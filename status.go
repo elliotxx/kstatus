@@ -62,11 +62,15 @@ func FromStringOrDie(text string) Status {
 // a resource.
 type Result struct {
 	// Status
-	Status Status
+	Status Status `json:"status,omitempty" yaml:"status,omitempty"`
 	// Message
-	Message string
+	Message string `json:"message,omitempty" yaml:"message,omitempty"`
 	// Conditions list of extracted conditions from Resource
-	Conditions []Condition
+	Conditions []Condition `json:"conditions,omitempty" yaml:"conditions,omitempty"`
+}
+
+func (r *Result) String() string {
+	return fmt.Sprintf("Status: %s, Message: %s, Conditions: %v", r.Status, r.Message, r.Conditions)
 }
 
 // Condition defines the general format for conditions on Kubernetes resources.
@@ -74,13 +78,17 @@ type Result struct {
 // most (maybe all) follows this structure.
 type Condition struct {
 	// Type condition type
-	Type ConditionType `json:"type,omitempty"`
+	Type ConditionType `json:"type,omitempty" yaml:"type,omitempty"`
 	// Status String that describes the condition status
-	Status corev1.ConditionStatus `json:"status,omitempty"`
+	Status corev1.ConditionStatus `json:"status,omitempty" yaml:"status,omitempty"`
 	// Reason one work CamelCase reason
-	Reason string `json:"reason,omitempty"`
+	Reason string `json:"reason,omitempty" yaml:"reason,omitempty"`
 	// Message Human readable reason string
-	Message string `json:"message,omitempty"`
+	Message string `json:"message,omitempty" yaml:"message,omitempty"`
+}
+
+func (c *Condition) String() string {
+	return fmt.Sprintf("Type: %s, Status: %s, Reason: %s, Message: %s", c.Type, c.Status, c.Reason, c.Message)
 }
 
 // Compute finds the status of a given unstructured resource. It does not
