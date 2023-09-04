@@ -10,7 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-// checkGenericProperties looks at the properties that are available on
+// CheckGenericProperties looks at the properties that are available on
 // all or most of the Kubernetes resources. If a decision can be made based
 // on this information, there is no need to look at the resource-specidic
 // rules.
@@ -19,7 +19,7 @@ import (
 // on this and none of the resource specific rules will be used. The goal here
 // is that if controllers, built-in or custom, use these conditions, we can easily
 // find status of resources.
-func checkGenericProperties(u *unstructured.Unstructured) (*Result, error) {
+func CheckGenericProperties(u *unstructured.Unstructured) (*Result, error) {
 	obj := u.UnstructuredContent()
 
 	// Check if the resource is scheduled for deletion

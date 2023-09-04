@@ -28,9 +28,7 @@ const (
 	UnknownStatus     Status = "Unknown"
 )
 
-var (
-	Statuses = []Status{InProgressStatus, FailedStatus, CurrentStatus, TerminatingStatus, UnknownStatus}
-)
+var Statuses = []Status{InProgressStatus, FailedStatus, CurrentStatus, TerminatingStatus, UnknownStatus}
 
 // ConditionType defines the set of condition types allowed inside a Condition struct.
 type ConditionType string
@@ -100,7 +98,7 @@ type Condition struct {
 // the resource has the given status. Finally, the result also contains
 // a list of standard resources that would belong on the given resource.
 func Compute(u *unstructured.Unstructured) (*Result, error) {
-	res, err := checkGenericProperties(u)
+	res, err := CheckGenericProperties(u)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +120,7 @@ func Compute(u *unstructured.Unstructured) (*Result, error) {
 	// does expose a Ready condition. Ready conditions do not adhere
 	// to the Kubernetes design recommendations, but they are pretty widely
 	// used.
-	res, err = checkReadyCondition(u)
+	res, err = CheckReadyCondition(u)
 	if res != nil || err != nil {
 		return res, err
 	}
@@ -138,7 +136,7 @@ func Compute(u *unstructured.Unstructured) (*Result, error) {
 	}, err
 }
 
-// checkReadyCondition checks if a resource has a Ready condition, and
+// CheckReadyCondition checks if a resource has a Ready condition, and
 // if so, it will use the value of this condition to determine the
 // status.
 // There are a few challenges with this:
@@ -151,7 +149,7 @@ func Compute(u *unstructured.Unstructured) (*Result, error) {
 // resource use the Ready condition.
 // - There is no way to determine if a resource with the Ready condition
 // set to False is making progress or is doomed.
-func checkReadyCondition(u *unstructured.Unstructured) (*Result, error) {
+func CheckReadyCondition(u *unstructured.Unstructured) (*Result, error) {
 	objWithConditions, err := GetObjectWithConditions(u.Object)
 	if err != nil {
 		return nil, err

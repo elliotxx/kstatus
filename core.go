@@ -17,25 +17,25 @@ import (
 // status of a built-in resource.
 type GetConditionsFn func(*unstructured.Unstructured) (*Result, error)
 
-// legacyTypes defines the mapping from GroupKind to a function that can
+// LegacyTypes defines the mapping from GroupKind to a function that can
 // compute the status for the given resource.
-var legacyTypes = map[string]GetConditionsFn{
-	"Service":                    serviceConditions,
-	"Pod":                        podConditions,
-	"Secret":                     alwaysReady,
-	"PersistentVolumeClaim":      pvcConditions,
-	"apps/StatefulSet":           stsConditions,
-	"apps/DaemonSet":             daemonsetConditions,
-	"extensions/DaemonSet":       daemonsetConditions,
-	"apps/Deployment":            deploymentConditions,
-	"extensions/Deployment":      deploymentConditions,
-	"apps/ReplicaSet":            replicasetConditions,
-	"extensions/ReplicaSet":      replicasetConditions,
-	"policy/PodDisruptionBudget": pdbConditions,
-	"batch/CronJob":              alwaysReady,
-	"ConfigMap":                  alwaysReady,
-	"batch/Job":                  jobConditions,
-	"apiextensions.k8s.io/CustomResourceDefinition": crdConditions,
+var LegacyTypes = map[string]GetConditionsFn{
+	"Service":                    ServiceConditions,
+	"Pod":                        PodConditions,
+	"Secret":                     AlwaysReady,
+	"PersistentVolumeClaim":      PvcConditions,
+	"apps/StatefulSet":           StsConditions,
+	"apps/DaemonSet":             DaemonsetConditions,
+	"extensions/DaemonSet":       DaemonsetConditions,
+	"apps/Deployment":            DeploymentConditions,
+	"extensions/Deployment":      DeploymentConditions,
+	"apps/ReplicaSet":            ReplicasetConditions,
+	"extensions/ReplicaSet":      ReplicasetConditions,
+	"policy/PodDisruptionBudget": PdbConditions,
+	"batch/CronJob":              AlwaysReady,
+	"ConfigMap":                  AlwaysReady,
+	"batch/Job":                  JobConditions,
+	"apiextensions.k8s.io/CustomResourceDefinition": CRDConditions,
 }
 
 const (
@@ -62,11 +62,11 @@ func GetLegacyConditionsFn(u *unstructured.Unstructured) GetConditionsFn {
 	if g == "" {
 		key = k
 	}
-	return legacyTypes[key]
+	return LegacyTypes[key]
 }
 
-// alwaysReady Used for resources that are always ready
-func alwaysReady(u *unstructured.Unstructured) (*Result, error) {
+// AlwaysReady Used for resources that are always ready
+func AlwaysReady(u *unstructured.Unstructured) (*Result, error) {
 	return &Result{
 		Status:     CurrentStatus,
 		Message:    "Resource is always ready",
@@ -74,13 +74,13 @@ func alwaysReady(u *unstructured.Unstructured) (*Result, error) {
 	}, nil
 }
 
-// stsConditions return standardized Conditions for Statefulset
+// StsConditions return standardized Conditions for Statefulset
 //
 // StatefulSet does define the .status.conditions property, but the controller never
 // actually sets any Conditions. Thus, status must be computed only based on the other
 // properties under .status. We don't have any way to find out if a reconcile for a
 // StatefulSet has failed.
-func stsConditions(u *unstructured.Unstructured) (*Result, error) {
+func StsConditions(u *unstructured.Unstructured) (*Result, error) {
 	obj := u.UnstructuredContent()
 
 	// updateStrategy==ondelete is a user managed statefulset.
@@ -151,11 +151,11 @@ func stsConditions(u *unstructured.Unstructured) (*Result, error) {
 	}, nil
 }
 
-// deploymentConditions return standardized Conditions for Deployment.
+// DeploymentConditions return standardized Conditions for Deployment.
 //
 // For Deployments, we look at .status.conditions as well as the other properties
 // under .status. Status will be Failed if the progress deadline has been exceeded.
-func deploymentConditions(u *unstructured.Unstructured) (*Result, error) {
+func DeploymentConditions(u *unstructured.Unstructured) (*Result, error) {
 	obj := u.UnstructuredContent()
 
 	progressing := false
@@ -249,8 +249,8 @@ func deploymentConditions(u *unstructured.Unstructured) (*Result, error) {
 	}, nil
 }
 
-// replicasetConditions return standardized Conditions for Replicaset
-func replicasetConditions(u *unstructured.Unstructured) (*Result, error) {
+// ReplicasetConditions return standardized Conditions for Replicaset
+func ReplicasetConditions(u *unstructured.Unstructured) (*Result, error) {
 	obj := u.UnstructuredContent()
 
 	// Conditions
@@ -301,8 +301,8 @@ func replicasetConditions(u *unstructured.Unstructured) (*Result, error) {
 	}, nil
 }
 
-// daemonsetConditions return standardized Conditions for DaemonSet
-func daemonsetConditions(u *unstructured.Unstructured) (*Result, error) {
+// DaemonsetConditions return standardized Conditions for DaemonSet
+func DaemonsetConditions(u *unstructured.Unstructured) (*Result, error) {
 	// We check that the latest generation is equal to observed generation as
 	// part of checking generic properties but in that case, we are lenient and
 	// skip the check if those fields are unset. For daemonset, we know that if
@@ -387,8 +387,8 @@ func checkGenerationSet(u *unstructured.Unstructured) (*Result, error) {
 	return nil, nil
 }
 
-// pvcConditions return standardized Conditions for PVC
-func pvcConditions(u *unstructured.Unstructured) (*Result, error) {
+// PvcConditions return standardized Conditions for PVC
+func PvcConditions(u *unstructured.Unstructured) (*Result, error) {
 	obj := u.UnstructuredContent()
 
 	phase := GetStringField(obj, ".status.phase", "unknown")
@@ -404,8 +404,8 @@ func pvcConditions(u *unstructured.Unstructured) (*Result, error) {
 	}, nil
 }
 
-// podConditions return standardized Conditions for Pod
-func podConditions(u *unstructured.Unstructured) (*Result, error) {
+// PodConditions return standardized Conditions for Pod
+func PodConditions(u *unstructured.Unstructured) (*Result, error) {
 	obj := u.UnstructuredContent()
 	objc, err := GetObjectWithConditions(obj)
 	if err != nil {
@@ -506,7 +506,7 @@ func getCrashLoopingContainers(obj map[string]interface{}) ([]string, bool, erro
 	return containerNames, false, nil
 }
 
-// pdbConditions computes the status for PodDisruptionBudgets. A PDB
+// PdbConditions computes the status for PodDisruptionBudgets. A PDB
 // is currently considered Current if the disruption controller has
 // observed the latest version of the PDB resource and has computed
 // the AllowedDisruptions. PDBs do have ObservedGeneration in the
@@ -516,7 +516,7 @@ func getCrashLoopingContainers(obj map[string]interface{}) ([]string, bool, erro
 // computing the AllowedDisruptions fails (and there are many ways
 // it can fail), but there is PR against OSS Kubernetes to address
 // this: https://github.com/kubernetes/kubernetes/pull/86929
-func pdbConditions(_ *unstructured.Unstructured) (*Result, error) {
+func PdbConditions(_ *unstructured.Unstructured) (*Result, error) {
 	// All ok
 	return &Result{
 		Status:     CurrentStatus,
@@ -525,12 +525,12 @@ func pdbConditions(_ *unstructured.Unstructured) (*Result, error) {
 	}, nil
 }
 
-// jobConditions return standardized Conditions for Job
+// JobConditions return standardized Conditions for Job
 //
 // A job will have the InProgress status until it starts running. Then it will have the Current
 // status while the job is running and after it has been completed successfully. It
 // will have the Failed status if it the job has failed.
-func jobConditions(u *unstructured.Unstructured) (*Result, error) {
+func JobConditions(u *unstructured.Unstructured) (*Result, error) {
 	obj := u.UnstructuredContent()
 
 	parallelism := GetIntField(obj, ".spec.parallelism", 1)
@@ -577,8 +577,8 @@ func jobConditions(u *unstructured.Unstructured) (*Result, error) {
 	}, nil
 }
 
-// serviceConditions return standardized Conditions for Service
-func serviceConditions(u *unstructured.Unstructured) (*Result, error) {
+// ServiceConditions return standardized Conditions for Service
+func ServiceConditions(u *unstructured.Unstructured) (*Result, error) {
 	obj := u.UnstructuredContent()
 
 	specType := GetStringField(obj, ".spec.type", "ClusterIP")
@@ -598,7 +598,7 @@ func serviceConditions(u *unstructured.Unstructured) (*Result, error) {
 	}, nil
 }
 
-func crdConditions(u *unstructured.Unstructured) (*Result, error) {
+func CRDConditions(u *unstructured.Unstructured) (*Result, error) {
 	obj := u.UnstructuredContent()
 
 	objc, err := GetObjectWithConditions(obj)
