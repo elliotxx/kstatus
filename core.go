@@ -36,13 +36,13 @@ var LegacyTypes = map[string]GetConditionsFn{
 }
 
 const (
-	tooFewReady     = "LessReady"
-	tooFewAvailable = "LessAvailable"
-	tooFewUpdated   = "LessUpdated"
-	tooFewReplicas  = "LessReplicas"
-	extraPods       = "ExtraPods"
+	TooFewReady     = "LessReady"
+	TooFewAvailable = "LessAvailable"
+	TooFewUpdated   = "LessUpdated"
+	TooFewReplicas  = "LessReplicas"
+	ExtraPods       = "ExtraPods"
 
-	onDeleteUpdateStrategy = "OnDelete"
+	OnDeleteUpdateStrategy = "OnDelete"
 
 	// How long a pod can be unscheduled before it is reported as
 	// unschedulable.
@@ -82,7 +82,7 @@ func StsConditions(u *unstructured.Unstructured) (*Result, error) {
 
 	// updateStrategy==ondelete is a user managed statefulset.
 	updateStrategy := GetStringField(obj, ".spec.updateStrategy.type", "")
-	if updateStrategy == onDeleteUpdateStrategy {
+	if updateStrategy == OnDeleteUpdateStrategy {
 		return &Result{
 			Status:     CurrentStatus,
 			Message:    "StatefulSet is using the ondelete update strategy",
@@ -100,17 +100,17 @@ func StsConditions(u *unstructured.Unstructured) (*Result, error) {
 
 	if specReplicas > statusReplicas {
 		message := fmt.Sprintf("Replicas: %d/%d", statusReplicas, specReplicas)
-		return NewInProgressStatus(tooFewReplicas, message), nil
+		return NewInProgressStatus(TooFewReplicas, message), nil
 	}
 
 	if specReplicas > readyReplicas {
 		message := fmt.Sprintf("Ready: %d/%d", readyReplicas, specReplicas)
-		return NewInProgressStatus(tooFewReady, message), nil
+		return NewInProgressStatus(TooFewReady, message), nil
 	}
 
 	if statusReplicas > specReplicas {
 		message := fmt.Sprintf("Pending termination: %d", statusReplicas-specReplicas)
-		return NewInProgressStatus(extraPods, message), nil
+		return NewInProgressStatus(ExtraPods, message), nil
 	}
 
 	// https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#partitions
@@ -206,27 +206,27 @@ func DeploymentConditions(u *unstructured.Unstructured) (*Result, error) {
 
 	if specReplicas > statusReplicas {
 		message := fmt.Sprintf("Replicas: %d/%d", statusReplicas, specReplicas)
-		return NewInProgressStatus(tooFewReplicas, message), nil
+		return NewInProgressStatus(TooFewReplicas, message), nil
 	}
 
 	if specReplicas > updatedReplicas {
 		message := fmt.Sprintf("Updated: %d/%d", updatedReplicas, specReplicas)
-		return NewInProgressStatus(tooFewUpdated, message), nil
+		return NewInProgressStatus(TooFewUpdated, message), nil
 	}
 
 	if statusReplicas > specReplicas {
 		message := fmt.Sprintf("Pending termination: %d", statusReplicas-specReplicas)
-		return NewInProgressStatus(extraPods, message), nil
+		return NewInProgressStatus(ExtraPods, message), nil
 	}
 
 	if updatedReplicas > availableReplicas {
 		message := fmt.Sprintf("Available: %d/%d", availableReplicas, updatedReplicas)
-		return NewInProgressStatus(tooFewAvailable, message), nil
+		return NewInProgressStatus(TooFewAvailable, message), nil
 	}
 
 	if specReplicas > readyReplicas {
 		message := fmt.Sprintf("Ready: %d/%d", readyReplicas, specReplicas)
-		return NewInProgressStatus(tooFewReady, message), nil
+		return NewInProgressStatus(TooFewReady, message), nil
 	}
 
 	// check conditions
@@ -278,17 +278,17 @@ func ReplicasetConditions(u *unstructured.Unstructured) (*Result, error) {
 
 	if specReplicas > availableReplicas {
 		message := fmt.Sprintf("Available: %d/%d", availableReplicas, specReplicas)
-		return NewInProgressStatus(tooFewAvailable, message), nil
+		return NewInProgressStatus(TooFewAvailable, message), nil
 	}
 
 	if specReplicas > readyReplicas {
 		message := fmt.Sprintf("Ready: %d/%d", readyReplicas, specReplicas)
-		return NewInProgressStatus(tooFewReady, message), nil
+		return NewInProgressStatus(TooFewReady, message), nil
 	}
 
 	if statusReplicas > specReplicas {
 		message := fmt.Sprintf("Pending termination: %d", statusReplicas-specReplicas)
-		return NewInProgressStatus(extraPods, message), nil
+		return NewInProgressStatus(ExtraPods, message), nil
 	}
 	// All ok
 	return &Result{
@@ -331,17 +331,17 @@ func DaemonsetConditions(u *unstructured.Unstructured) (*Result, error) {
 
 	if desiredNumberScheduled > updatedNumberScheduled {
 		message := fmt.Sprintf("Updated: %d/%d", updatedNumberScheduled, desiredNumberScheduled)
-		return NewInProgressStatus(tooFewUpdated, message), nil
+		return NewInProgressStatus(TooFewUpdated, message), nil
 	}
 
 	if desiredNumberScheduled > numberAvailable {
 		message := fmt.Sprintf("Available: %d/%d", numberAvailable, desiredNumberScheduled)
-		return NewInProgressStatus(tooFewAvailable, message), nil
+		return NewInProgressStatus(TooFewAvailable, message), nil
 	}
 
 	if desiredNumberScheduled > numberReady {
 		message := fmt.Sprintf("Ready: %d/%d", numberReady, desiredNumberScheduled)
-		return NewInProgressStatus(tooFewReady, message), nil
+		return NewInProgressStatus(TooFewReady, message), nil
 	}
 
 	// All ok
