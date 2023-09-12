@@ -1,15 +1,10 @@
-// Copyright 2019 The Kubernetes Authors.
-// SPDX-License-Identifier: Apache-2.0
-
-package status_test
+package kstatus
 
 import (
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"sigs.k8s.io/cli-utils/pkg/kstatus/polling/testutil"
-	"sigs.k8s.io/cli-utils/pkg/kstatus/status"
 	"sigs.k8s.io/yaml"
 )
 
@@ -34,12 +29,12 @@ status:
     - type: Available
       status: "True"
 `
-	deployment := testutil.YamlToUnstructured(t, deploymentManifest)
+	deployment := YamlToUnstructured(t, deploymentManifest)
 
-	res, err := status.Compute(deployment)
+	res, err := Compute(deployment)
 	assert.NoError(t, err)
 
-	assert.Equal(t, status.Status("Current"), res.Status)
+	assert.Equal(t, Status("Current"), res.Status)
 }
 
 func TestExampleAugment(t *testing.T) {
@@ -63,9 +58,9 @@ status:
     - type: Available
       status: "True"
 `
-	deployment := testutil.YamlToUnstructured(t, deploymentManifest)
+	deployment := YamlToUnstructured(t, deploymentManifest)
 
-	err := status.Augment(deployment)
+	err := Augment(deployment)
 	assert.NoError(t, err)
 
 	b, err := yaml.Marshal(deployment.Object)

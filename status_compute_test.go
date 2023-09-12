@@ -1,7 +1,4 @@
-// Copyright 2019 The Kubernetes Authors.
-// SPDX-License-Identifier: Apache-2.0
-
-package status
+package kstatus
 
 import (
 	"fmt"
@@ -263,6 +260,7 @@ metadata:
    generation: 1
    name: test
 `
+
 var pvcBound = `
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -314,6 +312,7 @@ metadata:
    generation: 1
    name: test
 `
+
 var stsBadStatus = `
 apiVersion: apps/v1
 kind: StatefulSet
@@ -357,6 +356,7 @@ status:
    readyReplicas: 2
    replicas: 4
 `
+
 var stsLessCurrent = `
 apiVersion: apps/v1
 kind: StatefulSet
@@ -372,6 +372,7 @@ status:
    readyReplicas: 4
    replicas: 4
 `
+
 var stsExtraPods = `
 apiVersion: apps/v1
 kind: StatefulSet
@@ -476,6 +477,7 @@ metadata:
    name: test
    generation: 1
 `
+
 var dsBadStatus = `
 apiVersion: apps/v1
 kind: DaemonSet
@@ -503,6 +505,7 @@ status:
    numberReady: 4
    observedGeneration: 1
 `
+
 var dsDifferentGeneration = `
 apiVersion: apps/v1
 kind: DaemonSet
@@ -534,6 +537,7 @@ status:
    numberAvailable: 4
    numberReady: 2
 `
+
 var dsLessAvailable = `
 apiVersion: apps/v1
 kind: DaemonSet
@@ -1349,6 +1353,7 @@ spec:
   type: LoadBalancer
   clusterIP: "1.2.3.4"
 `
+
 var serviceLBnok = `
 apiVersion: v1
 kind: Service

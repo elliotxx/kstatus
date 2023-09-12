@@ -1,6 +1,3 @@
-// Copyright 2019 The Kubernetes Authors.
-// SPDX-License-Identifier: Apache-2.0
-
 // Package kstatus contains functionality for computing the status
 // of Kubernetes resources.
 //
@@ -40,4 +37,4 @@
 //	)
 //
 //	err := status.Augment(resource)
-package status
+package kstatus
