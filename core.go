@@ -100,24 +100,24 @@ func StsConditions(u *unstructured.Unstructured) (*Result, error) {
 
 	if specReplicas > statusReplicas {
 		message := fmt.Sprintf("Replicas: %d/%d", statusReplicas, specReplicas)
-		return newInProgressStatus(tooFewReplicas, message), nil
+		return NewInProgressStatus(tooFewReplicas, message), nil
 	}
 
 	if specReplicas > readyReplicas {
 		message := fmt.Sprintf("Ready: %d/%d", readyReplicas, specReplicas)
-		return newInProgressStatus(tooFewReady, message), nil
+		return NewInProgressStatus(tooFewReady, message), nil
 	}
 
 	if statusReplicas > specReplicas {
 		message := fmt.Sprintf("Pending termination: %d", statusReplicas-specReplicas)
-		return newInProgressStatus(extraPods, message), nil
+		return NewInProgressStatus(extraPods, message), nil
 	}
 
 	// https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#partitions
 	if partition != -1 {
 		if updatedReplicas < (specReplicas - partition) {
 			message := fmt.Sprintf("updated: %d/%d", updatedReplicas, specReplicas-partition)
-			return newInProgressStatus("PartitionRollout", message), nil
+			return NewInProgressStatus("PartitionRollout", message), nil
 		}
 		// Partition case All ok
 		return &Result{
@@ -129,7 +129,7 @@ func StsConditions(u *unstructured.Unstructured) (*Result, error) {
 
 	if specReplicas > currentReplicas {
 		message := fmt.Sprintf("current: %d/%d", currentReplicas, specReplicas)
-		return newInProgressStatus("LessCurrent", message), nil
+		return NewInProgressStatus("LessCurrent", message), nil
 	}
 
 	// Revision
@@ -137,7 +137,7 @@ func StsConditions(u *unstructured.Unstructured) (*Result, error) {
 	updatedRevision := GetStringField(obj, ".status.updateRevision", "")
 	if currentRevision != updatedRevision {
 		message := "Waiting for updated revision to match current"
-		return newInProgressStatus("RevisionMismatch", message), nil
+		return NewInProgressStatus("RevisionMismatch", message), nil
 	}
 
 	// All ok
@@ -206,37 +206,37 @@ func DeploymentConditions(u *unstructured.Unstructured) (*Result, error) {
 
 	if specReplicas > statusReplicas {
 		message := fmt.Sprintf("Replicas: %d/%d", statusReplicas, specReplicas)
-		return newInProgressStatus(tooFewReplicas, message), nil
+		return NewInProgressStatus(tooFewReplicas, message), nil
 	}
 
 	if specReplicas > updatedReplicas {
 		message := fmt.Sprintf("Updated: %d/%d", updatedReplicas, specReplicas)
-		return newInProgressStatus(tooFewUpdated, message), nil
+		return NewInProgressStatus(tooFewUpdated, message), nil
 	}
 
 	if statusReplicas > specReplicas {
 		message := fmt.Sprintf("Pending termination: %d", statusReplicas-specReplicas)
-		return newInProgressStatus(extraPods, message), nil
+		return NewInProgressStatus(extraPods, message), nil
 	}
 
 	if updatedReplicas > availableReplicas {
 		message := fmt.Sprintf("Available: %d/%d", availableReplicas, updatedReplicas)
-		return newInProgressStatus(tooFewAvailable, message), nil
+		return NewInProgressStatus(tooFewAvailable, message), nil
 	}
 
 	if specReplicas > readyReplicas {
 		message := fmt.Sprintf("Ready: %d/%d", readyReplicas, specReplicas)
-		return newInProgressStatus(tooFewReady, message), nil
+		return NewInProgressStatus(tooFewReady, message), nil
 	}
 
 	// check conditions
 	if !progressing {
 		message := "ReplicaSet not Available"
-		return newInProgressStatus("ReplicaSetNotAvailable", message), nil
+		return NewInProgressStatus("ReplicaSetNotAvailable", message), nil
 	}
 	if !available {
 		message := "Deployment not Available"
-		return newInProgressStatus("DeploymentNotAvailable", message), nil
+		return NewInProgressStatus("DeploymentNotAvailable", message), nil
 	}
 	// All ok
 	return &Result{
@@ -260,7 +260,7 @@ func ReplicasetConditions(u *unstructured.Unstructured) (*Result, error) {
 		// https://github.com/kubernetes/kubernetes/blob/a3ccea9d8743f2ff82e41b6c2af6dc2c41dc7b10/pkg/controller/replicaset/replica_set_utils.go
 		if c.Type == "ReplicaFailure" && c.Status == corev1.ConditionTrue {
 			message := "Replica Failure condition. Check Pods"
-			return newInProgressStatus("ReplicaFailure", message), nil
+			return NewInProgressStatus("ReplicaFailure", message), nil
 		}
 	}
 
@@ -273,22 +273,22 @@ func ReplicasetConditions(u *unstructured.Unstructured) (*Result, error) {
 
 	if specReplicas > fullyLabelledReplicas {
 		message := fmt.Sprintf("Labelled: %d/%d", fullyLabelledReplicas, specReplicas)
-		return newInProgressStatus("LessLabelled", message), nil
+		return NewInProgressStatus("LessLabelled", message), nil
 	}
 
 	if specReplicas > availableReplicas {
 		message := fmt.Sprintf("Available: %d/%d", availableReplicas, specReplicas)
-		return newInProgressStatus(tooFewAvailable, message), nil
+		return NewInProgressStatus(tooFewAvailable, message), nil
 	}
 
 	if specReplicas > readyReplicas {
 		message := fmt.Sprintf("Ready: %d/%d", readyReplicas, specReplicas)
-		return newInProgressStatus(tooFewReady, message), nil
+		return NewInProgressStatus(tooFewReady, message), nil
 	}
 
 	if statusReplicas > specReplicas {
 		message := fmt.Sprintf("Pending termination: %d", statusReplicas-specReplicas)
-		return newInProgressStatus(extraPods, message), nil
+		return NewInProgressStatus(extraPods, message), nil
 	}
 	// All ok
 	return &Result{
@@ -321,27 +321,27 @@ func DaemonsetConditions(u *unstructured.Unstructured) (*Result, error) {
 
 	if desiredNumberScheduled == -1 {
 		message := "Missing .status.desiredNumberScheduled"
-		return newInProgressStatus("NoDesiredNumber", message), nil
+		return NewInProgressStatus("NoDesiredNumber", message), nil
 	}
 
 	if desiredNumberScheduled > currentNumberScheduled {
 		message := fmt.Sprintf("Current: %d/%d", currentNumberScheduled, desiredNumberScheduled)
-		return newInProgressStatus("LessCurrent", message), nil
+		return NewInProgressStatus("LessCurrent", message), nil
 	}
 
 	if desiredNumberScheduled > updatedNumberScheduled {
 		message := fmt.Sprintf("Updated: %d/%d", updatedNumberScheduled, desiredNumberScheduled)
-		return newInProgressStatus(tooFewUpdated, message), nil
+		return NewInProgressStatus(tooFewUpdated, message), nil
 	}
 
 	if desiredNumberScheduled > numberAvailable {
 		message := fmt.Sprintf("Available: %d/%d", numberAvailable, desiredNumberScheduled)
-		return newInProgressStatus(tooFewAvailable, message), nil
+		return NewInProgressStatus(tooFewAvailable, message), nil
 	}
 
 	if desiredNumberScheduled > numberReady {
 		message := fmt.Sprintf("Ready: %d/%d", numberReady, desiredNumberScheduled)
-		return newInProgressStatus(tooFewReady, message), nil
+		return NewInProgressStatus(tooFewReady, message), nil
 	}
 
 	// All ok
@@ -364,7 +364,7 @@ func checkGenerationSet(u *unstructured.Unstructured) (*Result, error) {
 		return &Result{
 			Status:     InProgressStatus,
 			Message:    message,
-			Conditions: []Condition{newReconcilingCondition("NoGeneration", message)},
+			Conditions: []Condition{NewReconcilingCondition("NoGeneration", message)},
 		}, nil
 	}
 
@@ -377,7 +377,7 @@ func checkGenerationSet(u *unstructured.Unstructured) (*Result, error) {
 		return &Result{
 			Status:     InProgressStatus,
 			Message:    message,
-			Conditions: []Condition{newReconcilingCondition("NoObservedGeneration", message)},
+			Conditions: []Condition{NewReconcilingCondition("NoObservedGeneration", message)},
 		}, nil
 	}
 
@@ -391,7 +391,7 @@ func PvcConditions(u *unstructured.Unstructured) (*Result, error) {
 	phase := GetStringField(obj, ".status.phase", "unknown")
 	if phase != "Bound" { // corev1.ClaimBound
 		message := fmt.Sprintf("PVC is not Bound. phase: %s", phase)
-		return newInProgressStatus("NotBound", message), nil
+		return NewInProgressStatus("NotBound", message), nil
 	}
 	// All ok
 	return &Result{
@@ -424,7 +424,7 @@ func PodConditions(u *unstructured.Unstructured) (*Result, error) {
 			Conditions: []Condition{},
 		}, nil
 	case "Running":
-		if hasConditionWithStatus(objc.Status.Conditions, "Ready", corev1.ConditionTrue) {
+		if HasConditionWithStatus(objc.Status.Conditions, "Ready", corev1.ConditionTrue) {
 			return &Result{
 				Status:     CurrentStatus,
 				Message:    "Pod is Ready",
@@ -437,27 +437,27 @@ func PodConditions(u *unstructured.Unstructured) (*Result, error) {
 			return nil, err
 		}
 		if isCrashLooping {
-			return newFailedStatus("ContainerCrashLooping",
+			return NewFailedStatus("ContainerCrashLooping",
 				fmt.Sprintf("Containers in CrashLoop state: %s", strings.Join(containerNames, ","))), nil
 		}
 
-		return newInProgressStatus("PodRunningNotReady", "Pod is running but is not Ready"), nil
+		return NewInProgressStatus("PodRunningNotReady", "Pod is running but is not Ready"), nil
 	case "Pending":
-		c, found := getConditionWithStatus(objc.Status.Conditions, "PodScheduled", corev1.ConditionFalse)
+		c, found := GetConditionWithStatus(objc.Status.Conditions, "PodScheduled", corev1.ConditionFalse)
 		if found && c.Reason == "Unschedulable" {
 			if time.Now().Add(-ScheduleWindow).Before(u.GetCreationTimestamp().Time) {
 				// We give the pod 15 seconds to be scheduled before we report it
 				// as unschedulable.
-				return newInProgressStatus("PodNotScheduled", "Pod has not been scheduled"), nil
+				return NewInProgressStatus("PodNotScheduled", "Pod has not been scheduled"), nil
 			}
-			return newFailedStatus("PodUnschedulable", "Pod could not be scheduled"), nil
+			return NewFailedStatus("PodUnschedulable", "Pod could not be scheduled"), nil
 		}
-		return newInProgressStatus("PodPending", "Pod is in the Pending phase"), nil
+		return NewInProgressStatus("PodPending", "Pod is in the Pending phase"), nil
 	default:
 		// If the controller hasn't observed the pod yet, there is no phase. We consider this as it
 		// still being in progress.
 		if phase == "" {
-			return newInProgressStatus("PodNotObserved", "Pod phase not available"), nil
+			return NewInProgressStatus("PodNotObserved", "Pod phase not available"), nil
 		}
 		return nil, fmt.Errorf("unknown phase %s", phase)
 	}
@@ -556,7 +556,7 @@ func JobConditions(u *unstructured.Unstructured) (*Result, error) {
 			}
 		case "Failed":
 			if c.Status == corev1.ConditionTrue {
-				return newFailedStatus("JobFailed",
+				return NewFailedStatus("JobFailed",
 					fmt.Sprintf("Job Failed. failed: %d/%d", failed, completions)), nil
 			}
 		}
@@ -565,7 +565,7 @@ func JobConditions(u *unstructured.Unstructured) (*Result, error) {
 	// replicas
 	if starttime == "" {
 		message := "Job not started"
-		return newInProgressStatus("JobNotStarted", message), nil
+		return NewInProgressStatus("JobNotStarted", message), nil
 	}
 	return &Result{
 		Status:     CurrentStatus,
@@ -584,7 +584,7 @@ func ServiceConditions(u *unstructured.Unstructured) (*Result, error) {
 	if specType == "LoadBalancer" {
 		if specClusterIP == "" {
 			message := "ClusterIP not set. Service type: LoadBalancer"
-			return newInProgressStatus("NoIPAssigned", message), nil
+			return NewInProgressStatus("NoIPAssigned", message), nil
 		}
 	}
 
@@ -605,11 +605,11 @@ func CRDConditions(u *unstructured.Unstructured) (*Result, error) {
 
 	for _, c := range objc.Status.Conditions {
 		if c.Type == "NamesAccepted" && c.Status == corev1.ConditionFalse {
-			return newFailedStatus(c.Reason, c.Message), nil
+			return NewFailedStatus(c.Reason, c.Message), nil
 		}
 		if c.Type == "Established" {
 			if c.Status == corev1.ConditionFalse && c.Reason != "Installing" {
-				return newFailedStatus(c.Reason, c.Message), nil
+				return NewFailedStatus(c.Reason, c.Message), nil
 			}
 			if c.Status == corev1.ConditionTrue {
 				return &Result{
@@ -620,5 +620,5 @@ func CRDConditions(u *unstructured.Unstructured) (*Result, error) {
 			}
 		}
 	}
-	return newInProgressStatus("Installing", "Install in progress"), nil
+	return NewInProgressStatus("Installing", "Install in progress"), nil
 }

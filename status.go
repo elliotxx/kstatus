@@ -172,12 +172,12 @@ func CheckReadyCondition(u *unstructured.Unstructured) (*Result, error) {
 				Conditions: []Condition{},
 			}, nil
 		case corev1.ConditionFalse:
-			return newInProgressStatus(cond.Reason, cond.Message), nil
+			return NewInProgressStatus(cond.Reason, cond.Message), nil
 		case corev1.ConditionUnknown:
 			// For now we just treat an unknown condition value as
 			// InProgress. We should consider if there are better ways
 			// to handle it.
-			return newInProgressStatus(cond.Reason, cond.Message), nil
+			return NewInProgressStatus(cond.Reason, cond.Message), nil
 		default:
 			// Do nothing in this case.
 		}

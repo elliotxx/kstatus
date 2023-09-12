@@ -8,9 +8,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// newReconcilingCondition creates an reconciling condition with the given
+// NewReconcilingCondition creates an reconciling condition with the given
 // reason and message.
-func newReconcilingCondition(reason, message string) Condition {
+func NewReconcilingCondition(reason, message string) Condition {
 	return Condition{
 		Type:    ConditionReconciling,
 		Status:  corev1.ConditionTrue,
@@ -19,7 +19,7 @@ func newReconcilingCondition(reason, message string) Condition {
 	}
 }
 
-func newStalledCondition(reason, message string) Condition {
+func NewStalledCondition(reason, message string) Condition {
 	return Condition{
 		Type:    ConditionStalled,
 		Status:  corev1.ConditionTrue,
@@ -28,21 +28,21 @@ func newStalledCondition(reason, message string) Condition {
 	}
 }
 
-// newInProgressStatus creates a status Result with the InProgress status
+// NewInProgressStatus creates a status Result with the InProgress status
 // and an InProgress condition.
-func newInProgressStatus(reason, message string) *Result {
+func NewInProgressStatus(reason, message string) *Result {
 	return &Result{
 		Status:     InProgressStatus,
 		Message:    message,
-		Conditions: []Condition{newReconcilingCondition(reason, message)},
+		Conditions: []Condition{NewReconcilingCondition(reason, message)},
 	}
 }
 
-func newFailedStatus(reason, message string) *Result {
+func NewFailedStatus(reason, message string) *Result {
 	return &Result{
 		Status:     FailedStatus,
 		Message:    message,
-		Conditions: []Condition{newStalledCondition(reason, message)},
+		Conditions: []Condition{NewStalledCondition(reason, message)},
 	}
 }
 
@@ -82,12 +82,12 @@ func GetObjectWithConditions(in map[string]interface{}) (*ObjWithConditions, err
 	return out, nil
 }
 
-func hasConditionWithStatus(conditions []BasicCondition, conditionType string, status corev1.ConditionStatus) bool {
-	_, found := getConditionWithStatus(conditions, conditionType, status)
+func HasConditionWithStatus(conditions []BasicCondition, conditionType string, status corev1.ConditionStatus) bool {
+	_, found := GetConditionWithStatus(conditions, conditionType, status)
 	return found
 }
 
-func getConditionWithStatus(conditions []BasicCondition, conditionType string, status corev1.ConditionStatus) (BasicCondition, bool) {
+func GetConditionWithStatus(conditions []BasicCondition, conditionType string, status corev1.ConditionStatus) (BasicCondition, bool) {
 	for _, c := range conditions {
 		if c.Type == conditionType && c.Status == status {
 			return c, true
