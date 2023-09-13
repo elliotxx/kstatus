@@ -8,11 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"sigs.k8s.io/yaml"
 )
 
 func y2u(t *testing.T, spec string) *unstructured.Unstructured {
-	j, err := yaml.YAMLToJSON([]byte(spec))
+	j, err := yaml2json([]byte(spec))
 	assert.NoError(t, err)
 	u, _, err := unstructured.UnstructuredJSONScheme.Decode(j, nil, nil)
 	assert.NoError(t, err)

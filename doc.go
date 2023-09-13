@@ -13,10 +13,10 @@
 // Compute function in the status package.
 //
 //	import (
-//	  "sigs.k8s.io/cli-utils/pkg/kstatus/status"
+//	  "github.com/elliotxx/kstatus"
 //	)
 //
-//	res, err := status.Compute(resource)
+//	res, err := kstatus.Compute(resource)
 //
 // The package also defines a set of new conditions:
 //   - InProgress
@@ -26,15 +26,4 @@
 // "abnormal-true" pattern where conditions should be set to true
 // for error/abnormal conditions and the absence of a condition means
 // things are normal.
-//
-// The Augment function augments any unstructured resource with
-// the standard conditions described above. The values of
-// these conditions are decided based on other status information
-// available in the resources.
-//
-//	import (
-//	  "sigs.k8s.io/cli-utils/pkg/kstatus/status
-//	)
-//
-//	err := status.Augment(resource)
 package kstatus
