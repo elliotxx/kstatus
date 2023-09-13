@@ -8,10 +8,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"sigs.k8s.io/yaml"
 )
 
 func y2u(t *testing.T, spec string) *unstructured.Unstructured {
-	j, err := yaml2json([]byte(spec))
+	t.Helper()
+	j, err := yaml.YAMLToJSON([]byte(spec))
 	assert.NoError(t, err)
 	u, _, err := unstructured.UnstructuredJSONScheme.Decode(j, nil, nil)
 	assert.NoError(t, err)
@@ -26,6 +28,7 @@ type testSpec struct {
 }
 
 func runStatusTest(t *testing.T, tc testSpec) {
+	t.Helper()
 	res, err := Compute(y2u(t, tc.spec))
 	assert.NoError(t, err)
 	assert.Equal(t, tc.expectedStatus, res.Status)

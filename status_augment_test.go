@@ -32,6 +32,7 @@ metadata:
 var timestamp = time.Now().Add(-1 * time.Minute).UTC().Format(time.RFC3339)
 
 func addConditions(t *testing.T, u *unstructured.Unstructured, conditions []map[string]interface{}) {
+	t.Helper()
 	conds := make([]interface{}, 0)
 	for _, c := range conditions {
 		conds = append(conds, c)

@@ -25,7 +25,7 @@ linters:
     - bodyclose
     - depguard
     - dogsled
-    - dupl
+    # - dupl
     - exportloopref
     - exhaustive
     - goconst
